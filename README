@@ -1,0 +1,22 @@
+Good to have links etc.
+
+https://github.com/openhab
+
+Addons
+
+https://github.com/openhab/openhab1-addons/wiki/exec-binding
+
+
+org.openhab.binding.astro-1.8.3.jar
+org.openhab.binding.cups-1.9.0-SNAPSHOT.jar
+org.openhab.binding.http-1.8.3.jar
+org.openhab.binding.ntp-1.8.3.jar
+org.openhab.binding.tellstick-1.8.3.jar
+org.openhab.binding.weather-1.8.3.jar
+org.openhab.binding.wol-1.8.3.jar
+org.openhab.binding.xbmc-1.8.3.jar
+org.openhab.persistence.exec-1.8.3.jar
+org.openhab.persistence.logging-1.8.3.jar
+org.openhab.persistence.mysql-1.8.3.jar
+org.openhab.persistence.rrd4j-1.8.3.jar
+

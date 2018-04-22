@@ -1,0 +1,77 @@
+sitemap default label="Main menu" {
+/*  
+Frame {
+     Group item=gGroundFloor label="Undervåning" icon="groundfloor"
+     Group item=gUpperFloow label="Övervåning" icon="firstfloor"
+  }*/
+    Frame label="Väder och temperatur" {
+        Text item=Humidity_Inside
+        Text item=Humidity_Garden
+        Text item=Temp_Garden {
+				  Text item=Temp_Garden_Max valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+				  Text item=Temp_Garden_Min valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+				  Switch item=Weather_Chart_Period label="Period" mappings=[0="Hour", 1="Day", 2="Week"]
+				  Chart item=Temp_Garden period=h refresh=6000 visibility=[Weather_Chart_Period==0, Weather_Chart_Period=="Uninitialized"]
+				  Chart item=Temp_Garden period=D refresh=30000 visibility=[Weather_Chart_Period==1]
+				  Chart item=Temp_Garden period=W refresh=30000 visibility=[Weather_Chart_Period==2]
+			}
+        Text item=Temp_Inside {
+				  Text item=Temp_Inside_Max valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+				  Text item=Temp_Inside_Min valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+				  Switch item=Weather_Chart_Period label="Period" mappings=[0="Hour", 1="Day", 2="Week"]
+				  Chart item=Temp_Inside period=h refresh=6000 visibility=[Weather_Chart_Period==0, Weather_Chart_Period=="Uninitialized"]
+				  Chart item=Temp_Inside period=D refresh=30000 visibility=[Weather_Chart_Period==1]
+				  Chart item=Temp_Inside period=W refresh=30000 visibility=[Weather_Chart_Period==2]
+			}
+        Text item=Temp_Outside {
+				  Text item=Temp_Outside_Max valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+				  Text item=Temp_Outside_Min valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+				  Switch item=Weather_Chart_Period label="Period" mappings=[0="Hour", 1="Day", 2="Week"]
+				  Chart item=Temp_Outside period=h refresh=6000 visibility=[Weather_Chart_Period==0, Weather_Chart_Period=="Uninitialized"]
+				  Chart item=Temp_Outside period=D refresh=30000 visibility=[Weather_Chart_Period==1]
+				  Chart item=Temp_Outside period=W refresh=30000 visibility=[Weather_Chart_Period==2]
+			}
+        Text item=Temp_SMHI {			
+				Group item=gSMHI label="Väderdata" icon="sun"
+			}
+    }
+
+    
+
+    Frame label="Lampor" {
+        Slider item=smallRoomDimmer
+        //Switch item=smallRoomSwitch
+        Slider item=bedRoomDimmer
+        //Switch item=bedRoomSwitch
+        Switch item=julgranSwitch
+        Switch item=bedRoomWindowSwitch
+        Switch item=aliciaBedroomSwitch
+        Switch item=aliciaLampaSwitch
+        Switch item=gardenSwitch
+        Switch item=oliverLedSwitch
+        Switch item=oliverLampaSwitch
+        //Switch item=gUpperFloor
+    }
+    Frame label="Tillstånd" {
+       Switch item=Guest
+    }
+    Frame label="Debug" {
+        Switch item=PulseLight
+        Switch item=WakeUpLight
+        Switch item=Network_HTPC
+        /*Text item=PrintJobsQueued*/
+    }
+
+	Frame label="Tid" {
+		Text item=Date
+    Text item=Sunrise_Time
+    Text item=Sunset_Time
+	}
+  Frame label="Övervakning" {
+        Text label=Camera icon="camera" {
+            Frame label="Livekamera" {
+                  Image url="http://192.168.1.5/image/jpeg.cgi" label="webcam" refresh=10000
+                  }
+           }
+      }
+}

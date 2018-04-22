@@ -25,8 +25,8 @@ Switch gardenSwitch "Utebelysning" <light> (gGarden) {tellstick="Utebelysning:Co
 Switch PulseLight "Pulserande" <hue>
 Switch WakeUpLight "Wake up" <hue>
 Switch Guest "Gäst i lilla rummet" <present>
-Number PrintJobsQueued "Skrivarjobb i kö: [%d]" {cups="laserjet#NOT_COMPLETED"}
-Switch PrinterSwitch "Skrivare" {tellstick="Lampa Oliver:Command"}
+#Number PrintJobsQueued "Skrivarjobb i kö: [%d]" {cups="laserjet#NOT_COMPLETED"}
+Switch internetSwitch "Internet barnen" {tellstick="Lampa Oliver:Command"}
 
 Switch Network_HTPC   "HTPC wakeup"   (Status, Network)   { wol="192.168.1.255#2c:56:dc:77:2e:b8" }
 

@@ -1,0 +1,274 @@
+import org.openhab.core.library.types.*
+import org.openhab.core.persistence.*
+import org.openhab.model.script.actions.*
+import java.lang.Math
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
+import java.text.SimpleDateFormat
+
+
+rule "Daylight - Sunrise"
+when
+	Item Sunrise_Event changed to ON
+then
+	logInfo("daylight", "End of sunrise. It is now daylight outside.")
+	Daylight.postUpdate(ON)
+end
+
+rule "Daylight - Sunset"
+when
+	Item Sunset_Event changed to ON
+then
+	logInfo("daylight", "Start of sunset. It is now dark outside.")
+	Daylight.postUpdate(OFF)
+end
+
+
+rule "Rule at sunrise"
+when
+    Item Sunrise_Event received update ON
+then
+    sendCommand(smallRoomDimmer, OFF)
+    Thread::sleep(1000)
+    sendCommand(gardenSwitch, OFF)
+    Thread::sleep(1000)
+    sendCommand(julgranSwitch, OFF)
+    Thread::sleep(1000)
+    sendCommand(bedroomWindowSwitch, OFF)
+    //TODO: switch off all lamps (a bit random..)
+end
+
+rule "Rule at sundown"
+when
+    Item Sunset_Event received update ON
+then
+    //TODO: use groups instead...
+    sendCommand(smallRoomDimmer, 70)
+    Thread::sleep(1000)
+    sendCommand(bedRoomDimmer, 30)
+    Thread::sleep(1000)
+    sendCommand(gardenSwitch, ON)
+    Thread::sleep(1000)
+    if(now.getHourOfDay < 20) {
+      sendCommand(aliciaLampaSwitch, ON)
+      Thread::sleep(1000)
+      sendCommand(oliverLampaSwitch, ON)
+      Thread::sleep(1000)
+      sendCommand(oliverLedSwitch, ON)
+      Thread::sleep(1000)
+      sendCommand(aliciaBedroomSwitch, ON)
+      Thread::sleep(1000)
+    }
+    sendCommand(julgranSwitch, ON)
+    Thread::sleep(1000)
+    sendCommand(bedroomWindowSwitch, ON)
+    
+end
+
+rule "Turn off at 23.00"
+when 
+    Time cron "0 00 23 * * ?"
+then
+    sendCommand(smallRoomDimmer, OFF)
+    Thread::sleep(1000)
+    sendCommand(bedRoomDimmer, OFF)
+    Thread::sleep(1000)
+    sendCommand(gardenSwitch, OFF)
+    Thread::sleep(1000)
+    sendCommand(julgranSwitch, OFF)
+    Thread::sleep(1000)
+    sendCommand(bedroomWindowSwitch, OFF)
+end
+
+rule "Turn off at 20.15"
+when 
+    Time cron "0 15 20 * * ?"
+then
+    sendCommand(aliciaLampaSwitch, OFF)
+    Thread::sleep(1000)
+    sendCommand(aliciaBedroomSwitch, ON)
+    Thread::sleep(1000)
+    sendCommand(oliverLampaSwitch, OFF)
+    Thread::sleep(1000)
+    sendCommand(oliverLedSwitch, OFF)
+end
+
+// TODO: Should only run if Sunrise_Time>06.00
+// TODO: Should only run if no guest
+rule "Myslys på morgonen"
+when 
+    Time cron "0 00 6 * * ?"
+then
+    if (Daylight.state == OFF) {
+      if (Guest.state == OFF) {
+        sendCommand(smallRoomDimmer, 70)
+      }
+      Thread::sleep(1000)
+      sendCommand(gardenSwitch, ON)
+      Thread::sleep(1000)
+      sendCommand(julgranSwitch, ON)
+    }
+end
+
+//Cron:
+//Seconds
+//Minutes
+//Hours
+//Day-of-Month
+//Month
+//Day-of-Week
+//Year (optional field)
+
+rule "Wake up slowly"
+    when 
+        Item WakeUpLight received command ON
+        //Time cron "0 00 6 ? * MON-FRI"
+    then
+        var Number wakeUpDimmer
+
+        wakeUpDimmer=0
+        while(wakeUpDimmer < 100)
+        {
+          wakeUpDimmer=wakeUpDimmer+9
+          if (WakeUpLight.state == ON) {
+            sendCommand(bedRoomDimmer, wakeUpDimmer)
+            //say("Wake up light at " + wakeUpDimmer + " %")
+            Thread::sleep(60000)
+          }
+        }
+        sendCommand(aliciaBedroomSwitch, ON)
+        Thread::sleep(1000)
+        sendCommand(bedRoomWindowSwitch, ON)
+        Thread::sleep(1000)
+        sendCommand(aliciaLampaSwitch, ON)
+        Thread::sleep(1000)
+        sendCommand(oliverLampaSwitch, ON)
+        Thread::sleep(1000)
+        sendCommand(oliverLedSwitch, ON)
+        WakeUpLight.state = OFF
+        createTimer(now.plusMinutes(30)) [|
+          sendCommand(bedRoomDimmer, OFF)
+          Thread::sleep(1000)
+          sendCommand(aliciaBedroomSwitch, OFF)
+          Thread::sleep(1000)
+          sendCommand(aliciaLampaSwitch, OFF) 
+          Thread::sleep(1000)
+          sendCommand(oliverLampaSwitch, OFF)
+          Thread::sleep(1000)
+          sendCommand(oliverLedSwitch, OFF)
+          //Thread::sleep(1000)
+          //sendCommand(bedRoomWindowSwitch, OFF)
+          ]
+end
+
+rule "pulselight"
+when
+Item PulseLight changed from OFF to ON
+then    
+    var Number pulseDimmer = 1
+    var Number i = 0
+    var State InitialBrightness = smallRoomDimmer.state
+    var State InitialState =  smallRoomSwitch.state
+    while (i<3) {
+        while(pulseDimmer<100){
+            pulseDimmer=pulseDimmer+9
+            sendCommand(smallRoomDimmer,pulseDimmer)
+            Thread::sleep(500)
+        }
+            while(pulseDimmer>1){
+            pulseDimmer=pulseDimmer-9
+            sendCommand(smallRoomDimmer,pulseDimmer)
+            Thread::sleep(500)
+        }
+    i = i+1 
+    }
+    sendCommand(smallRoomDimmer,InitialBrightness)
+    Thread::sleep(200)
+    sendCommand(smallRoomSwitch,InitialState)   
+end
+
+rule "Update Temperature Min- and Max values"
+    when
+        Item Temp_Outside received update
+    then
+        var Number Min
+        var Number Max
+        var String tmp
+        var SimpleDateFormat df = new SimpleDateFormat( "HH:mm" ) 
+
+        if (Temp_Outside.state instanceof DecimalType) {
+            Min = (Temp_Outside.minimumSince(now.toDateMidnight, "rrd4j").state as DecimalType)
+            tmp = (Math::round(Min.floatValue*10.0)/10.0) + " °C (" + df.format(Temp_Outside.minimumSince(now.toDateMidnight, "rrd4j").timestamp) + " )"
+            postUpdate(Temp_Outside_Min, tmp)
+
+            Max = Temp_Outside.maximumSince(now.toDateMidnight, "rrd4j").state as DecimalType
+            df = new SimpleDateFormat( "HH:mm" ) 
+            tmp = (Math::round(Max.floatValue*10.0)/10.0) + " °C (" + df.format(Temp_Outside.maximumSince(now.toDateMidnight, "rrd4j").timestamp) + ")"
+            postUpdate(Temp_Outside_Max, tmp)
+        }
+        if (Temp_Inside.state instanceof DecimalType) {
+            Min = (Temp_Inside.minimumSince(now.toDateMidnight, "rrd4j").state as DecimalType)
+            tmp = (Math::round(Min.floatValue*10.0)/10.0) + " °C (" + df.format(Temp_Inside.minimumSince(now.toDateMidnight, "rrd4j").timestamp) + " )"
+            postUpdate(Temp_Inside_Min, tmp)
+
+            Max = Temp_Inside.maximumSince(now.toDateMidnight, "rrd4j").state as DecimalType
+            df = new SimpleDateFormat( "HH:mm" ) 
+            tmp = (Math::round(Max.floatValue*10.0)/10.0) + " °C (" + df.format(Temp_Inside.maximumSince(now.toDateMidnight, "rrd4j").timestamp) + ")"
+            postUpdate(Temp_Inside_Max, tmp)
+        }
+        if (Temp_Garden.state instanceof DecimalType) {
+            Min = (Temp_Garden.minimumSince(now.toDateMidnight, "rrd4j").state as DecimalType)
+            tmp = (Math::round(Min.floatValue*10.0)/10.0) + " °C (" + df.format(Temp_Garden.minimumSince(now.toDateMidnight, "rrd4j").timestamp) + " )"
+            postUpdate(Temp_Garden_Min, tmp)
+
+            Max = Temp_Garden.maximumSince(now.toDateMidnight, "rrd4j").state as DecimalType
+            df = new SimpleDateFormat( "HH:mm" ) 
+            tmp = (Math::round(Max.floatValue*10.0)/10.0) + " °C (" + df.format(Temp_Garden.maximumSince(now.toDateMidnight, "rrd4j").timestamp) + ")"
+            postUpdate(Temp_Garden_Max, tmp)
+        }
+end
+
+var Timer printerDeskTimer = null
+
+
+rule "CUPS-Printer"
+when
+  Item PrintJobsQueued changed
+then
+
+
+  // Check if we have any queued jobs.
+  if (PrintJobsQueued.state != 0) {
+    // Yes, we have queued jobs.
+    logInfo("CUPS-Printer", PrintJobsQueued.state+" queued job(s) found")
+
+    // Cancel running timer if any
+    if (printerDeskTimer!=null) {
+      logInfo("CUPS-Printer", "Cancelling running shutdown timer")
+      printerDeskTimer.cancel
+      printerDeskTimer=null
+    }
+
+
+    // Turn on printer if it's off.
+    if (PrinterSwitch.state!=ON) {
+      logInfo("CUPS-Printer", "Powering on printer")
+      sendCommand(PrinterSwitch,ON)
+    } else {
+      logInfo("CUPS-Printer", "Printer is already on")
+    }
+  } else {
+    // No queued jobs.
+    logInfo("CUPS-Printer", "No more jobs queued")
+
+      logInfo("CUPS-Printer", "Printer is idle, shutting down printer in 5 minutes")
+      // Turn off printer in 5 minutes
+      // If it starts printing again, timer is killed.
+      printerDeskTimer = createTimer(now.plusMinutes(5)) [|
+        sendCommand(PrinterSwitch,OFF)
+      ]
+    }
+  }
+end
+

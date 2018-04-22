@@ -1,0 +1,118 @@
+Group Home
+Group gUpperFloor (Home)
+Group gGroundFloor (Home)
+Group gTemp (Home)
+Group gWeather (Home)
+Group gSMHI (Home)
+
+Dimmer smallRoomDimmer "Lilla rummet [%d %%]" <slider> (gGroundFloor) {tellstick="Dimmer nere:DimmingLevel"}
+Dimmer bedRoomDimmer "Sovrum [%d %%]" <slider> (gUpperFloor) {tellstick="Dimmer sovrum:DimmingLevel"}
+
+Switch smallRoomSwitch "Lilla rummet" <light> (gGroundFloor) {tellstick="Dimmer nere:Command"}
+Switch julgranSwitch "Julgran" <light> (gGroundFloor) {tellstick="Julgran:Command"}
+
+Switch bedRoomSwitch "Sovrum" <light> (gUpperFloor) {tellstick="Dimmer sovrum:Command"}
+Switch bedRoomWindowSwitch "Sovrum fönster" <light> (gUpperFloor) {tellstick="Lampa sovrum:Command"}
+
+Switch aliciaBedroomSwitch "Alicia sänglampa" <light> (gUpperFloor) {tellstick="Alicias rum:Command"}
+Switch aliciaLampaSwitch "Alicia myslampa" <light> (gUpperFloor) {tellstick="Lampa:Command"}
+
+Switch oliverLedSwitch "Oliver led" <light> (gUpperFloor) {tellstick="Ledlys Oliver:Command"}
+Switch oliverLampaSwitch "Oliver lampa" <light> (gUpperFloor) {tellstick="Lampa Oliver:Command"}
+//Group:Switch:OR(ON,OFF) gUpperFloor "Ovanvåningen [(%d)]" <light> (gUpperFloor)
+
+Switch gardenSwitch "Utebelysning" <light> (gGarden) {tellstick="Utebelysning:Command"}
+Switch PulseLight "Pulserande" <hue>
+Switch WakeUpLight "Wake up" <hue>
+Switch Guest "Gäst i lilla rummet" <present>
+Number PrintJobsQueued "Skrivarjobb i kö: [%d]" {cups="laserjet#NOT_COMPLETED"}
+Switch PrinterSwitch "Skrivare" {tellstick="Lampa Oliver:Command"}
+
+Switch Network_HTPC   "HTPC wakeup"   (Status, Network)   { wol="192.168.1.255#2c:56:dc:77:2e:b8" }
+
+Number Temp_Outside "Temperatur ute [%.1f °C]"   <temperature> (gTemp) {tellstick="136:Temperature"}
+Number Temp_Inside "Temperatur inne [%.1f °C]"   <temperature> (gTemp) {tellstick="135:Temperature"}
+Number Humidity_Inside "Luftfuktighet inne [%d %%]"   <temperature> (gTemp) {tellstick="135:Humidity"}
+Number Temp_Garden "Temperatur trädgården [%.1f °C]"   <temperature> (gTemp) {tellstick="151:Temperature"}
+Number Humidity_Garden "Luftfuktighet trädgården [%d %%]"   <temperature> (gTemp) {tellstick="151:Humidity"}
+Number Temp_Yahoo   "Temperature Yahoo [%.1f °C]"   <temperature> (gTemp) {weather="locationId=home, type=temperature, property=current"}
+
+Number Temp_SMHI "Temp [%.1f C°]" (gSMHI) { smhi="55.704660:13.191007:temperature" }
+Number Humidity_SMHI "Luftfuktighet [%.1f %%]" (gSMHI) { smhi="55.704660:13.191007:visibility" } 
+Number Thunderstorm_SMHI "Åskrisk [%.1f %%]" (gSMHI) { smhi="55.704660:13.191007:probability_thunderstorm" }
+Number Clouds_SMHI "Moln [%.1f]" (gSMHI) { smhi="55.704660:13.191007:clouds" }
+
+String XBMC_State "State [%s]" {xbmc="<[#livingRoom|Player.State]"}
+String XBMC_Title "Title [%s]" {xbmc="<[#livingRoom|Player.Title]"}
+
+Number XBMC_Volume "Volume [%d]" {xbmc="=[#livingRoom|Application.Volume]"} 
+
+DateTime Date "Datum [%1$tA, %1$td.%1$tm.%1$tY]"   <calendar>  { ntp="Europe/Stockholm:sv_SE" }
+Number Weather_Chart_Period
+String Temp_Outside_Max 		"Dagens största [%s]"	<temperature> (Weather_Chart)
+String Temp_Outside_Min 		"Dagens minsta [%s]"	<temperature> (Weather_Chart)
+String Temp_Inside_Max 		"Dagens största [%s]"	<temperature> (Weather_Chart)
+String Temp_Inside_Min 		"Dagens minsta [%s]"	<temperature> (Weather_Chart)
+String Temp_Garden_Max 		"Dagens största [%s]"	<temperature> (Weather_Chart)
+String Temp_Garden_Min 		"Dagens minsta [%s]"	<temperature> (Weather_Chart)
+
+/* Astro */
+
+Switch Daylight
+
+// shows the sunrise
+DateTime Sunrise_Time  "Soluppgång [%1$tH:%1$tM]" <calendar> {astro="planet=sun, type=rise, property=start"}
+
+Switch Sunrise_Event   {astro="planet=sun, type=rise, property=start", offset=10}
+
+// shows the sunset
+DateTime Sunset_Time   "Solnedgång [%1$tH:%1$tM]"  <calendar> {astro="planet=sun, type=set, property=end"}
+
+Switch Sunset_Event    {astro="planet=sun, type=set, property=end, offset=-10"}
+
+
+/* Weather */
+// atmosphere
+Number   Humidity         "Humidity [%d %%]"      (gWeather) {weather="locationId=home, type=atmosphere, property=humidity"}
+Number   Visibility       "Visibility [%.2f km]"  (gWeather) {weather="locationId=home, type=atmosphere, property=visibility"}
+Number   Pressure         "Pressure [%.2f mb]"    (gWeather) {weather="locationId=home, type=atmosphere, property=pressure"}
+String   Pressure_Trend   "Pressuretrend [%s]"    (gWeather) {weather="locationId=home, type=atmosphere, property=pressureTrend"}
+Number   Ozone            "Ozone [%d ppm]"        (gWeather) {weather="locationId=home, type=atmosphere, property=ozone"}
+Number   UV_Index         "UV Index"              (gWeather) {weather="locationId=home, type=atmosphere, property=uvIndex, scale=0"}
+
+// clouds
+Number   Clouds   "Clouds [%.0f %%]"   (gWeather) {weather="locationId=home, type=clouds, property=percent"}
+
+// condition
+String   Condition        "Condition [%s]"      (gWeather) {weather="locationId=home, type=condition, property=text"}
+String   Condition_ID     "Condition id [%s]"   (gWeather) {weather="locationId=home, type=condition, property=id"}
+DateTime ObservationTime  "Observation time [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"   (gWeather) {weather="locationId=home, type=condition, property=observationTime"}
+DateTime LastUpdate       "Last update [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"        (gWeather) {weather="locationId=home, type=condition, property=lastUpdate"}
+String   CommonId         "Common id [%s]"      (gWeather) {weather="locationId=home, type=condition, property=commonId"}
+
+// precipitation
+Number   Rain          "Rain [%.2f mm/h]"   (gWeather) {weather="locationId=home, type=precipitation, property=rain"}
+Number   Snow          "Snow [%.2f mm/h]"   (gWeather) {weather="locationId=home, type=precipitation, property=snow"}
+Number   Precip_Probability   "Precip probability [%d %%]"   (gWeather) {weather="locationId=home, type=precipitation, property=probability"}
+// new total property in 1.8, only Wunderground
+Number   Precip_Total         "Precip total [%d mm]"   (gWeather) {weather="locationId=home, type=precipitation, property=total"}
+
+// temperature
+Number   Temperature      "Temperature [%.2f °C]"       (gWeather) {weather="locationId=home, type=temperature, property=current"}
+Number   Temp_Feel        "Temperature feel [%.2f °C]"  (gWeather) {weather="locationId=home, type=temperature, property=feel"}
+
+// min and max values only available in forecasts
+Number   Temp_Min         "Temperature min [%.2f °C]"   (gWeather) {weather="locationId=home, type=temperature, property=min"}
+Number   Temp_Max         "Temperature max [%.2f °C]"   (gWeather) {weather="locationId=home, type=temperature, property=max"}
+String   Temp_MinMax      "Min/Max [%s °C]"             (gWeather) {weather="locationId=home, type=temperature, property=minMax"}
+
+
+// wind
+Number   Wind_Speed           "Windspeed [%.2f km/h]"    (gWeather) {weather="locationId=home, type=wind, property=speed"}
+Number   Wind_Speed_Knots     "Windspeed [%.2f kn]"      (gWeather) {weather="locationId=home, type=wind, property=speed, unit=knots"}
+String   Wind_Direction       "Wind direction [%s]"      (gWeather) {weather="locationId=home, type=wind, property=direction"}
+Number   Wind_Degree          "Wind degree [%.0f °]"     (gWeather) {weather="locationId=home, type=wind, property=degree"}
+Number   Wind_Gust            "Wind gust [%.2f km/h]"    (gWeather) {weather="locationId=home, type=wind, property=gust"}
+Number   Wind_Gust_Knots      "Wind gust [%.2f kn]"      (gWeather) {weather="locationId=home, type=wind, property=gust, unit=knots"}
+Number   Wind_Chill           "Wind chill [%.2f °C]"     (gWeather) {weather="locationId=home, type=wind, property=chill"}
+

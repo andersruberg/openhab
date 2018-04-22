@@ -1,0 +1,9 @@
+Strategies {
+	everyMinute : "0 * * * * ?"
+}
+
+Items {
+	*Switch : strategy = everyChange, everyMinute, restoreOnStartup
+	
+	Temp*,Humidity*,Weather_Chart* : strategy = everyMinute, restoreOnStartup
+}
